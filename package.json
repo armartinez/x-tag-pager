@@ -1,0 +1,12 @@
+{
+  "name": "x-pager",
+  "version": "0.1.0",
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "~1.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/armartinez/x-tag-pager"
+  }
+}
