@@ -119,12 +119,6 @@
 
         setActive.call(this, page);
 
-        if (this.xtag.active == 1) {
-            xtag.fireEvent(this, 'first');
-        } else if (this.xtag.active === this.xtag.pageCount()) {
-            xtag.fireEvent(this, 'last');
-        }
-
         xtag.fireEvent(this, 'moved', {
             detail: {
                 page: this.xtag.active,
@@ -132,6 +126,12 @@
                 offset: (page - 1) * this.xtag.pageSize
             }
         });
+
+        if (this.xtag.active == 1) {
+            xtag.fireEvent(this, 'first');
+        } else if (this.xtag.active === this.xtag.pageCount()) {
+            xtag.fireEvent(this, 'last');
+        }
 
         this.xtag.moving = false;
 
