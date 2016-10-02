@@ -65,6 +65,8 @@
                 }
             },
             next: function () {
+                disableButton.call(this, '.prev', false);
+
                 if (this.xtag.moving) {
                     return;
                 }
@@ -72,6 +74,8 @@
                 return move.call(this, this.xtag.active + 1);
             },
             prev: function () {
+                disableButton.call(this, '.next', false);
+
                 if (this.xtag.moving) {
                     return;
                 }
@@ -79,6 +83,9 @@
                 return move.call(this, this.xtag.active - 1);
             },
             to: function (page) {
+                disableButton.call(this, '.prev', false);
+                disableButton.call(this, '.next', false);
+
                 var that = this;
 
                 if (this.xtag.moving) {
@@ -93,11 +100,9 @@
         },
         events: {
             'tap:delegate(.prev)': function (e) {
-                disableButton.call(e.currentTarget, '.next', false);
                 e.currentTarget.prev();
             },
             'tap:delegate(.next)': function (e) {
-                disableButton.call(e.currentTarget, '.prev', false);
                 e.currentTarget.next();
             },
             first: function (e) {
