@@ -2,13 +2,11 @@
     xtag.register('x-pager', {
         lifecycle: {
             created: function () {
-                this.xtag.pageSize = 5;
-                this.xtag.itemCount = 0;
                 this.xtag.active = 1;
                 this.xtag.moving = false;
                 this.xtag.loop = false;
-                this.xtag.content = [];
-
+                this.xtag.pageSize = 5;
+                this.xtag.itemCount = 0;
                 this.xtag.pageCount = function () {
                     return Math.ceil(this.itemCount / this.pageSize);
                 };
@@ -94,11 +92,19 @@
             }
         },
         events: {
-            'tap:delegate(.pager-prev)': function (e) {
+            'tap:delegate(.prev)': function (e) {
+                disableButton.call(e.currentTarget, '.next', false);
                 e.currentTarget.prev();
             },
-            'tap:delegate(.pager-next)': function (e) {
+            'tap:delegate(.next)': function (e) {
+                disableButton.call(e.currentTarget, '.prev', false);
                 e.currentTarget.next();
+            },
+            first: function (e) {
+                disableButton.call(e.currentTarget, '.prev', true);
+            },
+            last: function (e) {
+                disableButton.call(e.currentTarget, '.next', true);
             }
         }
     });
@@ -106,15 +112,21 @@
     function move(page) {
         this.xtag.moving = true;
 
-        if (setActive.call(this, page)) {
-            xtag.fireEvent(this, 'moved', {
-                detail: {
-                    page: this.xtag.active,
-                    pageSize: this.xtag.pageSize,
-                    offset: (page - 1) * this.xtag.pageSize
-                }
-            });
+        setActive.call(this, page);
+
+        if (this.xtag.active == 1) {
+            xtag.fireEvent(this, 'first');
+        } else if (this.xtag.active === this.xtag.pageCount()) {
+            xtag.fireEvent(this, 'last');
         }
+
+        xtag.fireEvent(this, 'moved', {
+            detail: {
+                page: this.xtag.active,
+                pageSize: this.xtag.pageSize,
+                offset: (page - 1) * this.xtag.pageSize
+            }
+        });
 
         this.xtag.moving = false;
 
@@ -130,6 +142,13 @@
             }
         }
 
-        return this.xtag.active = page;
+        this.xtag.active = page;
+    }
+
+    function disableButton(selector, disabled) {
+        var btn = xtag.query(this, selector)
+        if (btn && btn[0].disabled !== disabled) {
+            btn[0].disabled = disabled;
+        };
     }
 })();
