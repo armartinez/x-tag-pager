@@ -126,14 +126,14 @@
                 offset: (page - 1) * this.xtag.pageSize
             }
         });
+  
+        this.xtag.moving = false;
 
         if (this.xtag.active == 1) {
             xtag.fireEvent(this, 'first');
         } else if (this.xtag.active === this.xtag.pageCount()) {
             xtag.fireEvent(this, 'last');
         }
-
-        this.xtag.moving = false;
 
         return this;
     }
