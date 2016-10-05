@@ -123,7 +123,7 @@
             detail: {
                 page: this.xtag.active,
                 pageSize: this.xtag.pageSize,
-                offset: (page - 1) * this.xtag.pageSize
+                offset: (this.xtag.active - 1) * this.xtag.pageSize
             }
         });
   
@@ -152,7 +152,7 @@
 
     function disableButton(selector, disabled) {
         var btn = xtag.query(this, selector)
-        if (btn && btn[0].disabled !== disabled) {
+        if (btn.length && btn[0].disabled !== disabled) {
             btn[0].disabled = disabled;
         };
     }

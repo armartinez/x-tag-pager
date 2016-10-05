@@ -10,6 +10,7 @@
     "src/x-tag-pager.js"
   ],
   "dependencies": {
-    "x-tag-core": "*"
+    "x-tag-core": "*",
+    "jasmine-core": "*"
   }
 }
