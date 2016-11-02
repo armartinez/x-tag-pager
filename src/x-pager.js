@@ -7,6 +7,8 @@
                 this.xtag.activePage = 1;
                 this.xtag.pageSize = 5;
                 this.xtag.itemCount = 0;
+
+                this.xtag.indicatorTemplate = '<div>{page}</div>';
             }
         },
         accessors: {
@@ -18,6 +20,14 @@
             activePage: {
                 get: function () {
                     return this.xtag.activePage;
+                }
+            },
+            indicatorTemplate: {
+                get: function () {
+                    return this.xtag.indicatorTemplate;
+                },
+                set: function (val) {
+                    this.xtag.indicatorTemplate = val;
                 }
             },
             pageSize: {
@@ -51,25 +61,31 @@
             }
         },
         methods: {
-            render: function (callback) {
-                if (typeof callback == "function") {
+            renderIndicators: function (selector) {       
                     var that = this,
-                        last = xtag.queryChildren(this, ".pager-next");
+                        container = xtag.query(document, selector)[0];
+                        
+                    container.innerHTML = '';
 
                     for (var page = 1; page <= this.pageCount; page++) {
-                        var link = xtag.createFragment(callback(page));
+                        var fragment = xtag.createFragment(this.xtag.indicatorTemplate), 
+                            element = fragment.firstChild;
+                        
+                        element.innerHTML = element.innerHTML.replace("{page}",page);
 
-                        this.xtag.content.push(link.firstChild);
+                        if (page == this.activePage)
+                        {
+                            element.classList.add('active');
+                        }
 
                         (function (arg) {
-                            xtag.addEvent(link.firstChild, 'tap', function (event) {
+                            xtag.addEvent(element, 'tap', function (event) {
                                 that.to(arg);
                             });
                         })(page);
 
-                        this.insertBefore(link, last[0]);
+                        container.appendChild(fragment);
                     }
-                }
             },
             next: function () {
                 disableButton.call(this, '.prev', false);
