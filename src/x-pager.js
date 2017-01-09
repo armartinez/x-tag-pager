@@ -36,7 +36,7 @@
                     return this.xtag.pageSize;
                 },
                 set: function (val) {
-                    this.xtag.pageSize = val;
+                    this.xtag.pageSize = parseInt(val);
                 }
             },
             itemCount: {
@@ -45,7 +45,7 @@
                     return this.xtag.itemCount;
                 },
                 set: function (val) {
-                    this.xtag.itemCount = val;
+                    this.xtag.itemCount = parseInt(val);
                 }
             },
             loop: {
@@ -62,9 +62,14 @@
         },
         methods: {
             renderIndicators: function (selector) {       
-                    var that = this,
+                    var that = this,container;
+                    
+                    if (selector instanceof HTMLElement) {
+                        container = selector;
+                    } else if (xtag.query(document, selector).length) {
                         container = xtag.query(document, selector)[0];
-                        
+                    } 
+                            
                     container.innerHTML = '';
 
                     for (var page = 1; page <= this.pageCount; page++) {
