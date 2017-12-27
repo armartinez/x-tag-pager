@@ -1,119 +1,171 @@
 (function () {
     xtag.register('x-pager', {
         lifecycle: {
-            created: function () {
+            created: function() {
                 this.xtag.moving = false;
-                this.xtag.loop = false;
                 this.xtag.activePage = 1;
-                this.xtag.pageSize = 5;
-                this.xtag.itemCount = 0;
+                this.xtag.templates = {
+                    indicator : '<div>{page}</div>',
+                    prev: '<div class="prev">prev</div>',
+                    next:  '<div class="next">next</div>',
+                    more: '<div class="more">...</div>'
+                }
+            },
+            inserted: function() {
+                var prevControl = xtag.query(this, '.prev');
+                if (prevControl.length){
+                    this.xtag.prevControl = prevElement[0];
+                }
 
-                this.xtag.indicatorTemplate = '<div>{page}</div>';
+                var nextControl = xtag.query(this, '.next');
+                if (nextControl.length){
+                    this.xtag.nextControl = nextControl[0];
+                }
             }
         },
         accessors: {
             pageCount: {
-                get: function () {
-                    return Math.ceil(this.xtag.itemCount / this.xtag.pageSize);
+                get: function() {
+                    return Math.ceil(this.itemCount / this.pageSize);
                 }
             },
             activePage: {
-                get: function () {
+                get: function() {
                     return this.xtag.activePage;
                 }
             },
-            indicatorTemplate: {
-                get: function () {
-                    return this.xtag.indicatorTemplate;
+            templates: {
+                get: function() {
+                    return this.xtag.templates;
                 },
-                set: function (val) {
-                    this.xtag.indicatorTemplate = val;
+                set: function(){
+                    Object.assign(this.xtag.templates, val);
                 }
             },
             pageSize: {
-                attribute: {},
-                get: function () {
-                    return this.xtag.pageSize;
-                },
-                set: function (val) {
-                    this.xtag.pageSize = parseInt(val);
+                attribute: {
+                    def: 5,
+                    validate: function(val) {
+                        return parseInt(val);
+                    }
                 }
             },
             itemCount: {
-                attribute: {},
-                get: function () {
-                    return this.xtag.itemCount;
-                },
-                set: function (val) {
-                    this.xtag.itemCount = parseInt(val);
+                attribute: {
+                    def: 0,
+                    validate: function(val) {
+                        return parseInt(val);
+                    }
+                }
+            },
+            maxPages: {
+                attribute: {
+                    def: 10,
+                    validate: function(val) {
+                        return parseInt(val);
+                    }
+                }
+            },
+            navigation: {
+                attribute: {
+                    boolean: true
                 }
             },
             loop: {
                 attribute: {
                     boolean: true
-                },
-                get: function () {
-                    return this.xtag.loop;
-                },
-                set: function (val) {
-                    this.xtag.loop = val;
                 }
             }
         },
         methods: {
-            renderIndicators: function (selector) {       
-                    var that = this,container;
+            renderControls: function(selector) {       
+                    var that = this, container;
                     
                     if (selector instanceof HTMLElement) {
                         container = selector;
-                    } else if (xtag.query(document, selector).length) {
-                        container = xtag.query(document, selector)[0];
-                    } 
+                    } else if (container = xtag.query(document, selector)) {
+                    } else {
+                        container = this.textContent;
+                    }
                             
                     container.innerHTML = '';
 
                     for (var page = 1; page <= this.pageCount; page++) {
-                        var fragment = xtag.createFragment(this.xtag.indicatorTemplate), 
+                        var fragment = xtag.createFragment(this.templates.indicator), 
                             element = fragment.firstChild;
                         
-                        element.innerHTML = element.innerHTML.replace("{page}",page);
+                        element.innerHTML = element.innerHTML.replace("{page}", page);
 
-                        if (page == this.activePage)
+                        if (page === this.activePage)
                         {
                             element.classList.add('active');
                         }
 
                         (function (arg) {
                             xtag.addEvent(element, 'tap', function (event) {
+                                disableElement(that.xtag.prevControl, false);
+                                disableElement(that.xtag.nextControl, false);
+
                                 that.to(arg);
+                                that.updateControls();
                             });
                         })(page);
 
                         container.appendChild(fragment);
                     }
-            },
-            next: function () {
-                disableButton.call(this, '.prev', false);
 
+                    if (this.navigation)
+                    {
+                        var prev = xtag.createFragment(this.templates.prev);
+                        var next = xtag.createFragment(this.templates.next); 
+
+                        this.xtag.prevControl = prev.firstChild;
+                        this.xtag.prevControl.onclick = function() {
+                            var disabled = this.getAttribute('disabled');
+                            if (disabled !== '' && disabled !== "disabled") {
+                                that.prev();
+                                that.updateControls();
+                            }
+                        };
+
+                        this.xtag.nextControl = next.firstChild;
+                        this.xtag.nextControl.onclick = function(){
+                            var disabled = this.getAttribute('disabled');
+                            if (disabled !== '' && disabled !== "disabled") {
+                                that.next();
+                                that.updateControls();
+                            }
+                        };
+
+                        if (this.xtag.activePage == 1) {
+                            disableElement(this.xtag.prevControl, true);
+                        } 
+
+                        if (this.xtag.activePage === this.pageCount) {
+                            disableElement(this.xtag.nextControl, true);
+                        }
+
+                        container.insertBefore(prev, container.firstChild);
+                        container.appendChild(next);
+                    }
+            },
+            updateControls: function() {
+            },
+            next: function() {
                 if (this.xtag.moving) {
                     return;
                 }
 
                 return move.call(this, this.xtag.activePage + 1);
             },
-            prev: function () {
-                disableButton.call(this, '.next', false);
-
+            prev: function() {
                 if (this.xtag.moving) {
                     return;
                 }
 
                 return move.call(this, this.xtag.activePage - 1);
             },
-            to: function (page) {
-                disableButton.call(this, '.prev', false);
-                disableButton.call(this, '.next', false);
-
+            to: function(page) {
                 var that = this;
 
                 if (this.xtag.moving) {
@@ -127,17 +179,23 @@
             }
         },
         events: {
-            'tap:delegate(.prev)': function (e) {
-                e.currentTarget.prev();
+            'tap:delegate(.prev)': function(e) {
+                var element = e.currentTarget;
+
+                disableElement(element.xtag.nextControl, false);
+                element.prev();
             },
-            'tap:delegate(.next)': function (e) {
-                e.currentTarget.next();
+            'tap:delegate(.next)': function(e) {
+                var element = e.currentTarget;
+
+                disableElement(element.xtag.prevControl, false);
+                element.next();
             },
-            first: function (e) {
-                disableButton.call(e.currentTarget, '.prev', true);
+            first: function(e) {
+                disableElement(e.currentTarget.xtag.prevControl, true);
             },
-            last: function (e) {
-                disableButton.call(e.currentTarget, '.next', true);
+            last: function(e) {
+                disableElement(e.currentTarget.xtag.nextControl, true);
             }
         }
     });
@@ -149,17 +207,17 @@
 
         xtag.fireEvent(this, 'moved', {
             detail: {
-                page: this.xtag.activePage,
-                pageSize: this.xtag.pageSize,
-                offset: (this.xtag.activePage - 1) * this.xtag.pageSize
+                page: this.activePage,
+                pageSize: parseInt(this.pageSize),
+                offset: (this.activePage - 1) * this.pageSize
             }
         });
   
         this.xtag.moving = false;
 
-        if (this.xtag.activePage == 1) {
+        if (this.activePage == 1) {
             xtag.fireEvent(this, 'first');
-        } else if (this.xtag.activePage === this.pageCount) {
+        } else if (this.activePage === this.pageCount) {
             xtag.fireEvent(this, 'last');
         }
 
@@ -168,7 +226,7 @@
 
     function setActive(page) {
         if (page > this.pageCount || page < 1) {
-            if (this.xtag.loop) {
+            if (this.loop) {
                 page = 1;
             } else {
                 return;
@@ -178,10 +236,13 @@
         this.xtag.activePage = page;
     }
 
-    function disableButton(selector, disabled) {
-        var btn = xtag.query(this, selector)
-        if (btn.length && btn[0].disabled !== disabled) {
-            btn[0].disabled = disabled;
-        };
+    function disableElement(element, disabled) {
+        if (element && element instanceof HTMLElement) {
+            if (disabled) {
+                element.setAttribute('disabled', '');
+            } else {
+                element.removeAttribute('disabled');
+            }
+        }
     }
 })();
