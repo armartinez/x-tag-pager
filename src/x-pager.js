@@ -14,7 +14,7 @@
             inserted: function() {
                 var prevControl = xtag.query(this, '.prev');
                 if (prevControl.length){
-                    this.xtag.prevControl = prevElement[0];
+                    this.xtag.prevControl = prevControl[0];
                 }
 
                 var nextControl = xtag.query(this, '.next');
@@ -83,14 +83,40 @@
                     
                     if (selector instanceof HTMLElement) {
                         container = selector;
-                    } else if (container = xtag.query(document, selector)) {
-                    } else {
-                        container = this.textContent;
+                    } else if (selector) {
+                        container = xtag.query(document, selector);
                     }
-                            
+                    
+                    if (container == undefined) {
+                        container = this;
+                    }
+                    
                     container.innerHTML = '';
 
-                    for (var page = 1; page <= this.pageCount; page++) {
+                    var start = 0;
+                    var end = 0;
+                    var count = parseInt(this.pageCount);
+                    var max = parseInt(this.maxPages);
+
+                    if (count > max) {
+                        if (this.activePage > max) {
+                            start = (max * Math.floor(this.activePage / max)) + 1;
+                        } else {
+                            start = 1;
+                        }
+
+                        end = start + max - 1;
+
+                        if (end > count)
+                        {
+                            end = count;
+                        }
+                    } else {
+                        start = 1;
+                        end = count;
+                    }
+
+                    for (var page = start; page <= end; page++) {
                         var fragment = xtag.createFragment(this.templates.indicator), 
                             element = fragment.firstChild;
                         

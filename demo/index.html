@@ -9,34 +9,44 @@
 </head>
 
 <body>
-  <h1>Pager demo</h1>
+  <h1>Pager demo 1</h1>
   <div id="items"></div>
   </br>
-  <x-pager item-count="18">
-    <button class="prev" disabled>Prev</button>
-    <button class="next">Next</button>
+  <x-pager item-count="85">
   </x-pager>
 </body>
 <script>
-      function loadData(index) {
+        function loadData(index) {
             var element = xtag.query(document.body, '#items')[0],
-                length = 5,
-                items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
-                data = items.slice(index, index + length);
+                endCount = index + 5;
+          
+            if (endCount > 85)
+            {
+               endCount = 85;
+            }
 
             element.innerHTML = '';
 
-            for (var i = 0; i < data.length; i++) {
-                var li = xtag.createFragment('<li class="list-group-item">This is the item #' + data[i] + '</li>');
+            for (var i = index; i < endCount; i++) {
+                var li = xtag.createFragment('<li class="list-group-item">This is the item #' + i + '</li>');
                 element.appendChild(li);
             }
         }
 
         var pager = xtag.query(document.body, 'x-pager')[0];
-
+ 
         xtag.addEvent(pager, 'moved', function(event){
               loadData(event.detail.offset);
+              pager.renderControls();
         });
+
+        document.addEventListener("WebComponentsReady", function(){
+          pager.templates.prev = '<button class="prev">Prev</button>';
+          pager.templates.next = '<button class="next">Next</button>';
+          pager.navigation = true;
+          pager.maxPages = 12;
+          pager.renderControls();
+        }); 
 
         loadData(0);
 </script>
