@@ -93,29 +93,16 @@
                     
                     container.innerHTML = '';
 
-                    var start = 0;
-                    var end = 0;
-                    var count = parseInt(this.pageCount);
-                    var max = parseInt(this.maxPages);
-
-                    if (count > max) {
-                        if (this.activePage > max) {
-                            start = (max * Math.floor(this.activePage / max)) + 1;
-                        } else {
-                            start = 1;
-                        }
-
-                        end = start + max - 1;
-
-                        if (end > count)
-                        {
-                            end = count;
-                        }
-                    } else {
-                        start = 1;
+                    var count = parseInt(this.pageCount),
+                        max = parseInt(this.maxPages);
+                        
+                    var start = (max * Math.floor((this.activePage - 1) / max)) + 1;
+                    var end = start + max - 1;
+                    if (end > count)
+                    {
                         end = count;
                     }
-
+                
                     for (var page = start; page <= end; page++) {
                         var fragment = xtag.createFragment(this.templates.indicator), 
                             element = fragment.firstChild;
